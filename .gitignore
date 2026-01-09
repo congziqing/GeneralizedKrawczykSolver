@@ -1,0 +1,31 @@
+# Eigen library
+eigen-3.4.0/
+
+# Compiled executables
+*.exe
+
+# Build files
+/build/
+*.obj
+*.o
+*.a
+*.lib
+
+# IDE files
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+.vs/
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Archive files
+eigen.zip
