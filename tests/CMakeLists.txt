@@ -1,7 +1,6 @@
-# 测试文件列表
+# Test file list
 set(TEST_SOURCES
     AESolutionSetTest.cpp
-    DebugKrawczyk.cpp
     DebugTest2.cpp
     EigenTest.cpp
     ExpandingMapTest.cpp
@@ -14,7 +13,7 @@ set(TEST_SOURCES
     ToleranceEmbeddingTest.cpp
 )
 
-# 为每个测试文件创建可执行文件
+# Create executable for each test file
 foreach(TEST_SOURCE ${TEST_SOURCES})
     get_filename_component(TEST_NAME ${TEST_SOURCE} NAME_WE)
     add_executable(${TEST_NAME} ${TEST_SOURCE})

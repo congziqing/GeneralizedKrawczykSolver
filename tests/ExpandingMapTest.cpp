@@ -2,16 +2,16 @@
 
 #include <iostream>
 #include <cmath>
-#include "../include/interval_krawczyk/PSGMDirectedInterval.h"
+#include "../include/interval_krawczyk/KaucherInterval.h"
 #include "../include/interval_krawczyk/IntervalVector.h"
 #include "../include/interval_krawczyk/IntervalMatrix.h"
 
 using namespace ik;
 
 // Helper function: create midpoint interval
-PSGMDirectedInterval midPointInterval(double x)
+KaucherInterval midPointInterval(double x)
 {
-    return PSGMDirectedInterval(x, x);
+    return KaucherInterval(x, x);
 }
 
 // Test 1: Simple linear expanding map x = 2x - [2, 4]
@@ -24,7 +24,7 @@ void testLinearExpandingMap()
     {
         ik::IntervalVector<1> result;
         // x - (2x - [2, 4]) = -x + [2, 4]
-        result[0] = x[0] - (midPointInterval(2.0) * x[0] - PSGMDirectedInterval(2.0, 4.0));
+        result[0] = x[0] - (midPointInterval(2.0) * x[0] - KaucherInterval(2.0, 4.0));
         return result;
     };
     
@@ -38,7 +38,7 @@ void testLinearExpandingMap()
     
     // 从初始区间 [2, 4] 开始
     ik::IntervalVector<1> xn;
-    xn[0] = PSGMDirectedInterval(2.0, 4.0);
+    xn[0] = KaucherInterval(2.0, 4.0);
     
     int maxIterations = 10;
     double tolerance = 1e-8;
@@ -81,7 +81,7 @@ void testLinearExpandingMap()
         // 6. 计算 box - c
         double delta = (xn[0].upper() - xn[0].lower()) / 2.0;
         ik::IntervalVector<1> box_minus_c;
-        box_minus_c[0] = PSGMDirectedInterval(-delta, delta);
+        box_minus_c[0] = KaucherInterval(-delta, delta);
         
         // 7. 计算 term3
         ik::IntervalVector<1> term3 = I_minus_YJ_interval * box_minus_c;
@@ -128,7 +128,7 @@ void testQuadraticExpandingMap()
     auto f = [](const ik::IntervalVector<1>& x) -> ik::IntervalVector<1>
     {
         ik::IntervalVector<1> result;
-        result[0] = x[0] * x[0] - x[0] - PSGMDirectedInterval(0.0, 2.0);
+        result[0] = x[0] * x[0] - x[0] - KaucherInterval(0.0, 2.0);
         return result;
     };
     
@@ -142,7 +142,7 @@ void testQuadraticExpandingMap()
     
     // 从包含x=2的初始区间 [1, 3] 开始
     ik::IntervalVector<1> xn;
-    xn[0] = PSGMDirectedInterval(1.0, 3.0);
+    xn[0] = KaucherInterval(1.0, 3.0);
     
     int maxIterations = 20;
     double tolerance = 1e-8;
@@ -185,7 +185,7 @@ void testQuadraticExpandingMap()
         // 6. 计算 box - c
         double delta = (xn[0].upper() - xn[0].lower()) / 2.0;
         ik::IntervalVector<1> box_minus_c;
-        box_minus_c[0] = PSGMDirectedInterval(-delta, delta);
+        box_minus_c[0] = KaucherInterval(-delta, delta);
         
         // 7. 计算 term3
         ik::IntervalVector<1> term3 = I_minus_YJ_interval * box_minus_c;

@@ -6,7 +6,7 @@
 #include <array>
 #include <iomanip>
 #include <Eigen/Dense>
-#include "../include/interval_krawczyk/PSGMDirectedInterval.h"
+#include "../include/interval_krawczyk/KaucherInterval.h"
 #include "../include/interval_krawczyk/IntervalVector.h"
 #include "../include/interval_krawczyk/IntervalMatrix.h"
 #include "../include/interval_krawczyk/GeneralizedKrawczykSolver.h"
@@ -66,7 +66,7 @@ public:
             auto g = [x_start](const ik::IntervalVector<N>& x) -> ik::IntervalVector<N> {
                 ik::IntervalVector<N> result;
                 for (size_t i = 0; i < N; ++i) {
-                    result[i] = x[i] - PSGMDirectedInterval(x_start[i], x_start[i]);
+                    result[i] = x[i] - ik::KaucherInterval(x_start[i], x_start[i]);
                 }
                 return result;
             };
@@ -75,7 +75,7 @@ public:
             auto jacobian_g = [](const ik::IntervalVector<N>& x) -> ik::IntervalMatrix<N, N> {
                 ik::IntervalMatrix<N, N> J;
                 for (size_t i = 0; i < N; ++i) {
-                    J(i, i) = PSGMDirectedInterval(1.0, 1.0);
+                    J(i, i) = ik::KaucherInterval(1.0, 1.0);
                 }
                 return J;
             };
@@ -141,7 +141,7 @@ public:
             double epsilon = 1e-4; // Strictly preserve interval width, avoid collapsing to point
             ik::IntervalVector<N> initialBox;
             for (size_t i = 0; i < N; ++i) {
-                initialBox[i] = PSGMDirectedInterval(newtonCenter[i] - epsilon, newtonCenter[i] + epsilon);
+                initialBox[i] = ik::KaucherInterval(newtonCenter[i] - epsilon, newtonCenter[i] + epsilon);
             }
             std::cout << "  Initial interval: " << initialBox << std::endl;
 
@@ -242,8 +242,8 @@ int main()
     
     // Show basic properties of Kaucher interval arithmetic
     std::cout << "=== Kaucher Interval Arithmetic Properties ===\n";
-    PSGMDirectedInterval proper(1.0, 2.0);
-    PSGMDirectedInterval improper(2.0, 1.0);
+    ik::KaucherInterval proper(1.0, 2.0);
+    ik::KaucherInterval improper(2.0, 1.0);
     
     std::cout << "Proper interval a = " << proper << std::endl;
     std::cout << "Improper interval b = " << improper << std::endl;
@@ -259,7 +259,7 @@ int main()
     // Define original function f(x, y) = (x^2 + y - 2, x - y)
     auto f = [](const ik::IntervalVector<2>& x) -> ik::IntervalVector<2> {
         ik::IntervalVector<2> result;
-        result[0] = x[0] * x[0] + x[1] - PSGMDirectedInterval(2.0, 2.0);
+        result[0] = x[0] * x[0] + x[1] - ik::KaucherInterval(2.0, 2.0);
         result[1] = x[0] - x[1];
         return result;
     };
@@ -275,10 +275,10 @@ int main()
     // Define Jacobian matrix
     auto jacobian = [](const ik::IntervalVector<2>& x) -> ik::IntervalMatrix<2, 2> {
         ik::IntervalMatrix<2, 2> J;
-        J(0, 0) = x[0] * PSGMDirectedInterval(2.0);
-        J(0, 1) = PSGMDirectedInterval(1.0);
-        J(1, 0) = PSGMDirectedInterval(1.0);
-        J(1, 1) = PSGMDirectedInterval(-1.0);
+        J(0, 0) = x[0] * ik::KaucherInterval(2.0);
+        J(0, 1) = ik::KaucherInterval(1.0);
+        J(1, 0) = ik::KaucherInterval(1.0);
+        J(1, 1) = ik::KaucherInterval(-1.0);
         return J;
     };
 

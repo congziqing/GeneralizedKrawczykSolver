@@ -5,7 +5,7 @@
 #include <cmath>
 #include <array>
 #include <Eigen/Dense>
-#include "PSGMDirectedInterval.h"
+#include "../include/interval_krawczyk/KaucherInterval.h"
 #include "IntervalVector.h"
 #include "IntervalMatrix.h"
 
@@ -96,8 +96,8 @@ int main()
     std::cout << "\n2. 构造小初始区间...\n";
     double delta = 0.01; // 使用更小的初始区间半径
     FixedIntervalVector<2> X;
-    X[0] = PSGMDirectedInterval(x1_star - delta, x1_star + delta);
-    X[1] = PSGMDirectedInterval(x2_star - delta, x2_star + delta);
+    X[0] = ik::KaucherInterval(x1_star - delta, x1_star + delta);
+    X[1] = ik::KaucherInterval(x2_star - delta, x2_star + delta);
     
     std::cout << "   初始区间X: " << X << std::endl;
     
@@ -118,8 +118,8 @@ int main()
     // 5. 定义目标Y（improper区间）
     std::cout << "\n4. 定义目标Y（improper区间）...\n";
     FixedIntervalVector<2> Y;
-    Y[0] = PSGMDirectedInterval(3.9, 4.1).dual(); // [4.1, 3.9]
-    Y[1] = PSGMDirectedInterval(-0.1, 0.1).dual(); // [0.1, -0.1]
+    Y[0] = ik::KaucherInterval(3.9, 4.1).dual(); // [4.1, 3.9]
+    Y[1] = ik::KaucherInterval(-0.1, 0.1).dual(); // [0.1, -0.1]
     
     std::cout << "   Y = " << Y << std::endl;
     
@@ -130,7 +130,7 @@ int main()
     bool inner_inclusion = true;
     for (size_t i = 0; i < 2; ++i)
     {
-        PSGMDirectedInterval Y_dual = Y[i].dual(); // 转换为proper区间
+        ik::KaucherInterval Y_dual = Y[i].dual(); // Convert to proper interval
         std::cout << "   Y_dual[" << i << "] = " << Y_dual << std::endl;
         std::cout << "   fX[" << i << "] = " << fX[i] << std::endl;
         

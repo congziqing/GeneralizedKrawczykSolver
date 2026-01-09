@@ -2,16 +2,16 @@
 
 #include <iostream>
 #include <cmath>
-#include "../include/interval_krawczyk/PSGMDirectedInterval.h"
+#include "../include/interval_krawczyk/KaucherInterval.h"
 #include "../include/interval_krawczyk/IntervalVector.h"
 #include "../include/interval_krawczyk/IntervalMatrix.h"
 
 using namespace ik;
 
 // Helper function: create midpoint interval
-PSGMDirectedInterval midPointInterval(double x)
+KaucherInterval midPointInterval(double x)
 {
-    return PSGMDirectedInterval(x, x);
+    return KaucherInterval(x, x);
 }
 
 // Test 1: Algebraic difference test X + [2, 3] = [5, 6]
@@ -24,7 +24,7 @@ void testAlgebraicDifference()
     {
         ik::IntervalVector<1> result;
         // X + [2, 3] - [5, 6]
-        result[0] = x[0] + PSGMDirectedInterval(2.0, 3.0) - PSGMDirectedInterval(5.0, 6.0);
+        result[0] = x[0] + KaucherInterval(2.0, 3.0) - KaucherInterval(5.0, 6.0);
         return result;
     };
     
@@ -39,7 +39,7 @@ void testAlgebraicDifference()
     std::cout << "初始区间: [0, 10]\n";
     
     ik::IntervalVector<1> xn;
-    xn[0] = PSGMDirectedInterval(0.0, 10.0);
+    xn[0] = KaucherInterval(0.0, 10.0);
     
     int maxIterations = 10;
     double tolerance = 1e-8;
@@ -73,7 +73,7 @@ void testAlgebraicDifference()
         // 6. 计算 box - c
         double delta = (xn[0].upper() - xn[0].lower()) / 2.0;
         ik::IntervalVector<1> box_minus_c;
-        box_minus_c[0] = PSGMDirectedInterval(-delta, delta);
+        box_minus_c[0] = KaucherInterval(-delta, delta);
         
         // 7. 计算 term3
         ik::IntervalVector<1> term3 = I_minus_YJ_interval * box_minus_c;
@@ -128,14 +128,14 @@ void testReverseWidthIteration()
         ik::IntervalMatrix<1, 1> J;
         // J(x) = 1 - 2 * (1 - tanh^2(2x))
         // 注意：tanh(2x) 的导数是 2(1 - tanh^2(2x))
-        PSGMDirectedInterval tanh_2x = ::interval::tanh(x[0] * 2.0);
+        KaucherInterval tanh_2x = ::interval::tanh(x[0] * 2.0);
         J(0, 0) = midPointInterval(1.0) - midPointInterval(2.0) * (midPointInterval(1.0) - tanh_2x * tanh_2x);
         return J;
     };
     
     // 从非常大的初始区间开始
     ik::IntervalVector<1> xn;
-    xn[0] = PSGMDirectedInterval(-10.0, 10.0);
+    xn[0] = KaucherInterval(-10.0, 10.0);
     
     int maxIterations = 20;
     double tolerance = 1e-8;
@@ -178,7 +178,7 @@ void testReverseWidthIteration()
         // 6. 计算 box - c
         double delta = (xn[0].upper() - xn[0].lower()) / 2.0;
         ik::IntervalVector<1> box_minus_c;
-        box_minus_c[0] = PSGMDirectedInterval(-delta, delta);
+        box_minus_c[0] = KaucherInterval(-delta, delta);
         
         // 7. 计算 term3
         ik::IntervalVector<1> term3 = I_minus_YJ_interval * box_minus_c;
@@ -222,10 +222,10 @@ int main()
     
     // Show basic properties of Kaucher interval arithmetic
     std::cout << "Kaucher Interval Arithmetic Basic Properties：\n";
-    PSGMDirectedInterval proper(1.0, 2.0);
-    PSGMDirectedInterval improper(2.0, 1.0);
-    PSGMDirectedInterval a(2.0, 3.0);
-    PSGMDirectedInterval b(5.0, 6.0);
+    KaucherInterval proper(1.0, 2.0);
+    KaucherInterval improper(2.0, 1.0);
+    KaucherInterval a(2.0, 3.0);
+    KaucherInterval b(5.0, 6.0);
     
     std::cout << "Proper interval: " << proper << std::endl;
     std::cout << "Improper interval: " << improper << std::endl;

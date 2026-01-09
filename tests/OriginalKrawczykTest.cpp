@@ -3,7 +3,7 @@
 #include <iostream>
 #include <vector>
 #include <cmath>
-#include "PSGMDirectedInterval.h"
+#include "../include/interval_krawczyk/KaucherInterval.h"
 #include "IntervalVector.h"
 #include "IntervalMatrix.h"
 #include "KrawczykSolver.h"
@@ -17,8 +17,8 @@ void testSimpleSystem()
     KrawczykSolver solver(2, simpleFunction, simpleJacobian);
     
     IntervalVector initialBox(2);
-    initialBox[0] = PSGMDirectedInterval(-3.0, 3.0);
-    initialBox[1] = PSGMDirectedInterval(-3.0, 3.0);
+    initialBox[0] = ik::KaucherInterval(-3.0, 3.0);
+    initialBox[1] = ik::KaucherInterval(-3.0, 3.0);
     
     auto result = solver.solve(initialBox);
     

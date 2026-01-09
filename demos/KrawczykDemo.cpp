@@ -1,6 +1,6 @@
 #include <iostream>
 #include <iomanip>
-#include "PSGMDirectedInterval.h"
+#include "../include/interval_krawczyk/KaucherInterval.h"
 #include "IntervalVector.h"
 #include "IntervalMatrix.h"
 #include "KrawczykSolver.h"
@@ -54,24 +54,24 @@ void example1_simpleSystem()
 
     auto f = [](const IntervalVector& x) -> IntervalVector {
         IntervalVector result(2);
-        result[0] = x[0] * x[0] + x[1] * x[1] - PSGMDirectedInterval(4.0, 4.0);
+        result[0] = x[0] * x[0] + x[1] * x[1] - ik::KaucherInterval(4.0, 4.0);
         result[1] = x[0] - x[1];
         return result;
     };
 
     auto jacobian = [](const IntervalVector& x) -> IntervalMatrix {
         IntervalMatrix J(2, 2);
-        J[0][0] = x[0] * PSGMDirectedInterval(2.0);
-        J[0][1] = x[1] * PSGMDirectedInterval(2.0);
-        J[1][0] = PSGMDirectedInterval(1.0);
-        J[1][1] = PSGMDirectedInterval(-1.0);
+        J[0][0] = x[0] * ik::KaucherInterval(2.0);
+        J[0][1] = x[1] * ik::KaucherInterval(2.0);
+        J[1][0] = ik::KaucherInterval(1.0);
+        J[1][1] = ik::KaucherInterval(-1.0);
         return J;
     };
 
     std::cout << "\n测试1.1: 初始区间 [-3, 3] × [-3, 3]" << std::endl;
     IntervalVector initial1(2);
-    initial1[0] = PSGMDirectedInterval(-3.0, 3.0);
-    initial1[1] = PSGMDirectedInterval(-3.0, 3.0);
+    initial1[0] = ik::KaucherInterval(-3.0, 3.0);
+    initial1[1] = ik::KaucherInterval(-3.0, 3.0);
 
     KrawczykSolver solver(2, f, jacobian, 1e-8, 50, 30);
     KrawczykResult result1 = solver.solve(initial1);
@@ -79,8 +79,8 @@ void example1_simpleSystem()
 
     std::cout << "\n测试1.2: 初始区间 [0, 3] × [0, 3]" << std::endl;
     IntervalVector initial2(2);
-    initial2[0] = PSGMDirectedInterval(0.0, 3.0);
-    initial2[1] = PSGMDirectedInterval(0.0, 3.0);
+    initial2[0] = ik::KaucherInterval(0.0, 3.0);
+    initial2[1] = ik::KaucherInterval(0.0, 3.0);
 
     KrawczykResult result2 = solver.solve(initial2);
     printResult(result2);
@@ -98,15 +98,15 @@ void example2_polynomial()
 
     auto f = [](const IntervalVector& x) -> IntervalVector {
         IntervalVector result(2);
-        result[0] = x[0] * x[0] + x[1] - PSGMDirectedInterval(3.0, 3.0);
-        result[1] = x[0] * x[1] - PSGMDirectedInterval(1.0, 1.0);
+        result[0] = x[0] * x[0] + x[1] - ik::KaucherInterval(3.0, 3.0);
+        result[1] = x[0] * x[1] - ik::KaucherInterval(1.0, 1.0);
         return result;
     };
 
     auto jacobian = [](const IntervalVector& x) -> IntervalMatrix {
         IntervalMatrix J(2, 2);
-        J[0][0] = x[0] * PSGMDirectedInterval(2.0);
-        J[0][1] = PSGMDirectedInterval(1.0);
+        J[0][0] = x[0] * ik::KaucherInterval(2.0);
+        J[0][1] = ik::KaucherInterval(1.0);
         J[1][0] = x[1];
         J[1][1] = x[0];
         return J;
@@ -114,8 +114,8 @@ void example2_polynomial()
 
     std::cout << "\n测试2.1: 初始区间 [-3, 3] × [-3, 3]" << std::endl;
     IntervalVector initial(2);
-    initial[0] = PSGMDirectedInterval(-3.0, 3.0);
-    initial[1] = PSGMDirectedInterval(-3.0, 3.0);
+    initial[0] = ik::KaucherInterval(-3.0, 3.0);
+    initial[1] = ik::KaucherInterval(-3.0, 3.0);
 
     KrawczykSolver solver(2, f, jacobian, 1e-8, 50, 30);
     KrawczykResult result = solver.solve(initial);
@@ -146,19 +146,19 @@ void example3_cubic()
 
     auto f = [](const IntervalVector& x) -> IntervalVector {
         IntervalVector result(1);
-        result[0] = x[0] * x[0] * x[0] - x[0] - PSGMDirectedInterval(1.0, 1.0);
+        result[0] = x[0] * x[0] * x[0] - x[0] - ik::KaucherInterval(1.0, 1.0);
         return result;
     };
 
     auto jacobian = [](const IntervalVector& x) -> IntervalMatrix {
         IntervalMatrix J(1, 1);
-        J[0][0] = x[0] * x[0] * PSGMDirectedInterval(3.0) - PSGMDirectedInterval(1.0);
+        J[0][0] = x[0] * x[0] * ik::KaucherInterval(3.0) - ik::KaucherInterval(1.0);
         return J;
     };
 
     std::cout << "\n测试3.1: 初始区间 [0, 2]" << std::endl;
     IntervalVector initial(1);
-    initial[0] = PSGMDirectedInterval(0.0, 2.0);
+    initial[0] = ik::KaucherInterval(0.0, 2.0);
 
     KrawczykSolver solver(1, f, jacobian, 1e-10, 100, 20);
     KrawczykResult result = solver.solve(initial);
@@ -175,19 +175,19 @@ void example4_trigonometric()
 
     auto f = [](const IntervalVector& x) -> IntervalVector {
         IntervalVector result(1);
-        result[0] = interval::sin(x[0]) - x[0] * PSGMDirectedInterval(0.5);
+        result[0] = interval::sin(x[0]) - x[0] * ik::KaucherInterval(0.5);
         return result;
     };
 
     auto jacobian = [](const IntervalVector& x) -> IntervalMatrix {
         IntervalMatrix J(1, 1);
-        J[0][0] = interval::cos(x[0]) - PSGMDirectedInterval(0.5);
+        J[0][0] = interval::cos(x[0]) - ik::KaucherInterval(0.5);
         return J;
     };
 
     std::cout << "\n测试4.1: 初始区间 [-π, π]" << std::endl;
     IntervalVector initial(1);
-    initial[0] = PSGMDirectedInterval(-3.14159, 3.14159);
+    initial[0] = ik::KaucherInterval(-3.14159, 3.14159);
 
     KrawczykSolver solver(1, f, jacobian, 1e-10, 50, 20);
     KrawczykResult result = solver.solve(initial);
@@ -206,7 +206,7 @@ void example5_exponential()
 
     auto f = [](const IntervalVector& x) -> IntervalVector {
         IntervalVector result(2);
-        result[0] = interval::exp(x[0]) + x[1] - PSGMDirectedInterval(2.0, 2.0);
+        result[0] = interval::exp(x[0]) + x[1] - ik::KaucherInterval(2.0, 2.0);
         result[1] = x[0] - interval::exp(x[1]);
         return result;
     };
@@ -214,16 +214,16 @@ void example5_exponential()
     auto jacobian = [](const IntervalVector& x) -> IntervalMatrix {
         IntervalMatrix J(2, 2);
         J[0][0] = interval::exp(x[0]);
-        J[0][1] = PSGMDirectedInterval(1.0);
-        J[1][0] = PSGMDirectedInterval(1.0);
+        J[0][1] = ik::KaucherInterval(1.0);
+        J[1][0] = ik::KaucherInterval(1.0);
         J[1][1] = -interval::exp(x[1]);
         return J;
     };
 
     std::cout << "\n测试5.1: 初始区间 [0, 1] × [0, 1]" << std::endl;
     IntervalVector initial(2);
-    initial[0] = PSGMDirectedInterval(0.0, 1.0);
-    initial[1] = PSGMDirectedInterval(0.0, 1.0);
+    initial[0] = ik::KaucherInterval(0.0, 1.0);
+    initial[1] = ik::KaucherInterval(0.0, 1.0);
 
     KrawczykSolver solver(2, f, jacobian, 1e-10, 50, 20);
     KrawczykResult result = solver.solve(initial);
@@ -236,8 +236,8 @@ void demonstrateIntervalArithmetic()
     std::cout << "区间算术演示" << std::endl;
     std::cout << std::string(60, '*') << std::endl;
 
-    PSGMDirectedInterval a(1.0, 3.0);
-    PSGMDirectedInterval b(2.0, 4.0);
+    ik::KaucherInterval a(1.0, 3.0);
+    ik::KaucherInterval b(2.0, 4.0);
 
     std::cout << "a = " << a << std::endl;
     std::cout << "b = " << b << std::endl;
@@ -249,7 +249,7 @@ void demonstrateIntervalArithmetic()
     std::cout << "a / b = " << (a / b) << std::endl;
 
     std::cout << "\n常用函数:" << std::endl;
-    PSGMDirectedInterval x(0.5, 2.0);
+    ik::KaucherInterval x(0.5, 2.0);
     std::cout << "x = " << x << std::endl;
     std::cout << "x² = " << (x * x) << std::endl;
     std::cout << "√x = " << interval::sqrt(x) << std::endl;

@@ -5,14 +5,16 @@
 #include <cmath>
 #include <array>
 #include <Eigen/Dense>
-#include "PSGMDirectedInterval.h"
-#include "IntervalVector.h"
-#include "IntervalMatrix.h"
+#include "../include/interval_krawczyk/KaucherInterval.h"
+#include "../include/interval_krawczyk/IntervalVector.h"
+#include "../include/interval_krawczyk/IntervalMatrix.h"
+
+using namespace ik;
 
 // Newton method pre-iteration function to find high-precision center point
 auto newton_method_2d(double x1_init, double x2_init)
 {
-    // 定义函数f(x1, x2) = (x1^2 + x2^2 - 4, x1 - x2)
+    // Define function f(x1, x2) = (x1^2 + x2^2 - 4, x1 - x2)
     auto f = [](double x1, double x2) -> std::array<double, 2> {
         return {
             x1 * x1 + x2 * x2 - 4.0,
@@ -20,7 +22,7 @@ auto newton_method_2d(double x1_init, double x2_init)
         };
     };
     
-    // 定义雅可比矩阵的点函数
+    // Define Jacobian matrix point function
     auto df = [](double x1, double x2) -> std::array<std::array<double, 2>, 2> {
         std::array<std::array<double, 2>, 2> result;
         result[0][0] = 2.0 * x1;
@@ -30,7 +32,7 @@ auto newton_method_2d(double x1_init, double x2_init)
         return result;
     };
     
-    // 牛顿迭代
+    // Newton iteration
     double x1 = x1_init;
     double x2 = x2_init;
     int max_iter = 10;
@@ -79,13 +81,13 @@ auto newton_method_2d(double x1_init, double x2_init)
     return std::make_pair(x1, x2);
 }
 
-// 固定维数广义Krawczyk求解器
+// Fixed-dimension Generalized Krawczyk Solver
 template<size_t N>
 class FixedGeneralizedKrawczykSolver
 {
 public:
-    using Function = std::function<FixedIntervalVector<N>(const FixedIntervalVector<N>&)>;
-    using JacobianFunction = std::function<FixedIntervalMatrix<N, N>(const FixedIntervalVector<N>&)>;
+    using Function = std::function<IntervalVector<N>(const IntervalVector<N>&)>;
+    using JacobianFunction = std::function<IntervalMatrix<N, N>(const IntervalVector<N>&)>;
     
     FixedGeneralizedKrawczykSolver(Function f, JacobianFunction jacobian, 
                                   double tolerance = 1e-8, int maxIterations = 50)
@@ -94,55 +96,55 @@ public:
     struct Result
     {
         bool success;
-        FixedIntervalVector<N> solution;
+        IntervalVector<N> solution;
         int iterations;
         double finalWidth;
         std::string message;
     };
     
-    Result solve(const FixedIntervalVector<N>& initialBox) const
+    Result solve(const IntervalVector<N>& initialBox) const
     {
-        FixedIntervalVector<N> current = initialBox;
+        IntervalVector<N> current = initialBox;
         
         for (int iter = 0; iter < maxIterations_; ++iter)
         {
-            double width = current.width();
+            double width = current.maxWidth();
             if (width < tolerance_)
             {
                 return {true, current, iter, width, "Converged successfully"};
             }
             
-            // 计算中点c
-            Eigen::VectorXd c = current.midpoint();
+            // Calculate midpoint c
+            Eigen::VectorXd c = current.middle();
             
-            // 创建中点的区间向量
-            FixedIntervalVector<N> c_vec;
+            // Create interval vector for midpoint
+            IntervalVector<N> c_vec;
             for (size_t i = 0; i < N; ++i)
             {
-                c_vec[i] = PSGMDirectedInterval(c(i), c(i));
+                c_vec[i] = KaucherInterval(c(i), c(i));
             }
             
-            // 计算f(c)
-            FixedIntervalVector<N> f_c = f_(c_vec);
+            // Calculate f(c)
+            IntervalVector<N> f_c = f_(c_vec);
             
-            // 计算雅可比矩阵J(x)
-            FixedIntervalMatrix<N, N> J = jacobian_(current);
+            // Calculate Jacobian matrix J(x)
+            IntervalMatrix<N, N> J = jacobian_(current);
             
-            // 计算雅可比矩阵的中点
-            Eigen::MatrixXd J_mid = J.midpoint();
+            // Calculate midpoint of Jacobian matrix
+            Eigen::MatrixXd J_mid = J.middle();
             
-            // 检查雅可比矩阵是否奇异
+            // Check if Jacobian is singular
             double det = J_mid.determinant();
             if (std::abs(det) < 1e-12)
             {
                 return {false, current, iter, width, "Singular Jacobian matrix"};
             }
             
-            // 计算雅可比矩阵的逆
+            // Calculate inverse of Jacobian matrix
             Eigen::MatrixXd Y = J_mid.inverse();
             
-            // 计算term1: c - Y * f(c)
-            FixedIntervalVector<N> term1;
+            // Calculate term1: c - Y * f(c)
+            IntervalVector<N> term1;
             for (size_t i = 0; i < N; ++i)
             {
                 double val = c(i);
@@ -150,47 +152,47 @@ public:
                 {
                     val -= Y(static_cast<int>(i), static_cast<int>(j)) * f_c[j].middle();
                 }
-                term1[i] = PSGMDirectedInterval(val, val);
+                term1[i] = KaucherInterval(val, val);
             }
             
-            // 计算I - Y * J(x)
+            // Calculate I - Y * J(x)
             Eigen::MatrixXd I = Eigen::MatrixXd::Identity(static_cast<int>(N), static_cast<int>(N));
-            Eigen::MatrixXd I_minus_YJ = I - Y * J.midpoint();
+            Eigen::MatrixXd I_minus_YJ = I - Y * J.middle();
             
-            // 创建区间矩阵I_minus_YJ_interval
-            FixedIntervalMatrix<N, N> I_minus_YJ_interval;
+            // Create interval matrix I_minus_YJ_interval
+            IntervalMatrix<N, N> I_minus_YJ_interval;
             for (size_t i = 0; i < N; ++i)
             {
                 for (size_t j = 0; j < N; ++j)
                 {
                     double val = I_minus_YJ(static_cast<int>(i), static_cast<int>(j));
-                    I_minus_YJ_interval(i, j) = PSGMDirectedInterval(val, val);
+                    I_minus_YJ_interval(i, j) = KaucherInterval(val, val);
                 }
             }
             
-            // 计算box - c
-            FixedIntervalVector<N> box_minus_c;
+            // Calculate box - c
+            IntervalVector<N> box_minus_c;
             for (size_t i = 0; i < N; ++i)
             {
                 double delta = (current[i].upper() - current[i].lower()) / 2.0;
-                box_minus_c[i] = PSGMDirectedInterval(-delta, delta);
+                box_minus_c[i] = KaucherInterval(-delta, delta);
             }
             
-            // 计算term3: (I - YJ) * (box - c)
-            FixedIntervalVector<N> term3 = I_minus_YJ_interval * box_minus_c;
+            // Calculate term3: (I - YJ) * (box - c)
+            IntervalVector<N> term3 = I_minus_YJ_interval * box_minus_c;
             
-            // 计算Krawczyk区间K = term1 + term3
-            FixedIntervalVector<N> K = term1 + term3;
+            // Calculate Krawczyk interval K = term1 + term3
+            IntervalVector<N> K = term1 + term3;
             
-            // 计算交集K ∩ current
-            FixedIntervalVector<N> next;
+            // Calculate intersection K ∩ current
+            IntervalVector<N> next;
             for (size_t i = 0; i < N; ++i)
             {
                 next[i] = current[i].meet(K[i]);
             }
             
-            // 检查是否收敛或发散
-            if (next[0].isEmpty() || next.width() > current.width() * 1000 || next.width() > 1e10)
+            // Check if converged or diverged
+            if (next[0].isEmpty() || next.maxWidth() > current.maxWidth() * 1000 || next.maxWidth() > 1e10)
             {
                 return {false, current, iter, width, "Krawczyk iteration produced empty or diverging interval"};
             }
@@ -198,7 +200,7 @@ public:
             current = next;
         }
         
-        return {false, current, maxIterations_, current.width(), "Maximum iterations reached"};
+        return {false, current, maxIterations_, current.maxWidth(), "Maximum iterations reached"};
     }
     
 private:
@@ -208,20 +210,20 @@ private:
     int maxIterations_;
 };
 
-// 验证函数：检查f(X)是否严格位于Y的内部
+// Verification function: Check if f(X) is strictly contained within Y's dual
 template<size_t N>
-bool verify_inner_inclusion(const FixedIntervalVector<N>& X, 
-                           const FixedIntervalVector<N>& Y, 
+bool verify_inner_inclusion(const IntervalVector<N>& X, 
+                           const IntervalVector<N>& Y, 
                            const typename FixedGeneralizedKrawczykSolver<N>::Function& f)
 {
-    // 计算f(X)
-    FixedIntervalVector<N> fX = f(X);
+    // Calculate f(X)
+    IntervalVector<N> fX = f(X);
     
     std::cout << "   f(X) = " << fX << std::endl;
     std::cout << "   Y    = " << Y << std::endl;
     
-    // 检查fX是否严格包含在Y的对偶区间内
-    // 对于Y是improper区间的情况，其对偶区间是proper区间[Y.upper(), Y.lower()]
+    // Check if fX is strictly contained within Y's dual interval
+    // For improper Y intervals, the dual is proper [Y.upper(), Y.lower()]
     for (size_t i = 0; i < N; ++i)
     {
         if (!Y[i].isImproper())
@@ -230,7 +232,7 @@ bool verify_inner_inclusion(const FixedIntervalVector<N>& X,
             return false;
         }
         
-        PSGMDirectedInterval Y_dual = Y[i].dual(); // 转换为proper区间 [Y.upper(), Y.lower()]
+        KaucherInterval Y_dual = Y[i].dual(); // Convert to proper interval [Y.upper(), Y.lower()]
         
         if (!fX[i].isProper())
         {
@@ -238,7 +240,7 @@ bool verify_inner_inclusion(const FixedIntervalVector<N>& X,
             return false;
         }
         
-        // 检查fX(i)是否严格包含在Y_dual内部
+        // Check if fX(i) is strictly contained within Y_dual
         bool contains = Y_dual.contains(fX[i]);
         std::cout << "   Is f(X)[" << i << "] contained in Y_dual[" << i << "]: " << (contains ? "Yes" : "No") << std::endl;
         
@@ -255,46 +257,46 @@ int main()
 {
     std::cout << "=== Tolerance Embedding Final Solution ===\n\n";
     
-    // 1. 使用牛顿法预迭代找到高精度中心点x*
+    // 1. Use Newton method to find high-precision center point x*
     std::cout << "1. Newton method pre-iteration to find center point...\n";
     double x1_init = 1.5;
     double x2_init = 1.5;
     auto [x1_star, x2_star] = newton_method_2d(x1_init, x2_init);
     
-    std::cout << "   初始猜测: (" << x1_init << ", " << x2_init << ")" << std::endl;
+    std::cout << "   Initial guess: (" << x1_init << ", " << x2_init << ")" << std::endl;
     std::cout << "   Newton method result: x* = (" << x1_star << ", " << x2_star << ")" << std::endl;
     
-    // 2. 构造小初始区间
+    // 2. Construct small initial interval
     std::cout << "\n2. Constructing small initial interval...\n";
-    double delta = 0.01; // 使用更小的初始区间半径
-    FixedIntervalVector<2> X0;
-    X0[0] = PSGMDirectedInterval(x1_star - delta, x1_star + delta);
-    X0[1] = PSGMDirectedInterval(x2_star - delta, x2_star + delta);
+    double delta = 0.01; // Use smaller initial interval radius
+    IntervalVector<2> X0;
+    X0[0] = KaucherInterval(x1_star - delta, x1_star + delta);
+    X0[1] = KaucherInterval(x2_star - delta, x2_star + delta);
     
-    std::cout << "   初始区间X0: " << X0 << std::endl;
+    std::cout << "   Initial interval X0: " << X0 << std::endl;
     
-    // 3. 定义函数f和雅可比矩阵
+    // 3. Define function f and Jacobian matrix
     std::cout << "\n3. Defining function f and Jacobian matrix...\n";
     
-    // 定义原函数f
-    auto f = [](const FixedIntervalVector<2>& x) -> FixedIntervalVector<2> {
-        FixedIntervalVector<2> result;
+    // Define original function f
+    auto f = [](const IntervalVector<2>& x) -> IntervalVector<2> {
+        IntervalVector<2> result;
         result[0] = x[0] * x[0] + x[1] * x[1];
         result[1] = x[0] - x[1];
         return result;
     };
     
-    // 定义雅可比矩阵
-    auto jacobian = [](const FixedIntervalVector<2>& x) -> FixedIntervalMatrix<2, 2> {
-        FixedIntervalMatrix<2, 2> J;
-        J(0, 0) = x[0] * PSGMDirectedInterval(2.0);
-        J(0, 1) = x[1] * PSGMDirectedInterval(2.0);
-        J(1, 0) = PSGMDirectedInterval(1.0);
-        J(1, 1) = PSGMDirectedInterval(-1.0);
+    // Define Jacobian matrix
+    auto jacobian = [](const IntervalVector<2>& x) -> IntervalMatrix<2, 2> {
+        IntervalMatrix<2, 2> J;
+        J(0, 0) = x[0] * KaucherInterval(2.0);
+        J(0, 1) = x[1] * KaucherInterval(2.0);
+        J(1, 0) = KaucherInterval(1.0);
+        J(1, 1) = KaucherInterval(-1.0);
         return J;
     };
     
-    // 4. 运行广义Krawczyk迭代
+    // 4. Run generalized Krawczyk iteration
     std::cout << "\n4. Running generalized Krawczyk iteration...\n";
     FixedGeneralizedKrawczykSolver<2> solver(f, jacobian, 1e-8, 50);
     
@@ -305,26 +307,26 @@ int main()
         std::cout << "   ✓ Krawczyk iteration succeeded!\n";
         std::cout << "   Iterations: " << result.iterations << std::endl;
         std::cout << "   Solution interval X_final: " << result.solution << std::endl;
-        std::cout << "   最终宽度: " << result.finalWidth << std::endl;
+        std::cout << "   Final width: " << result.finalWidth << std::endl;
         
-        // 5. 定义目标Y（improper区间）
+        // 5. Define target Y (improper interval)
         std::cout << "\n5. Defining target Y (improper interval)...\n";
-        FixedIntervalVector<2> Y;
-        Y[0] = PSGMDirectedInterval(3.9, 4.1).dual(); // 非正常区间 [4.1, 3.9]
-        Y[1] = PSGMDirectedInterval(-0.1, 0.1).dual(); // 非正常区间 [0.1, -0.1]
+        IntervalVector<2> Y;
+        Y[0] = KaucherInterval(3.9, 4.1).dual(); // Improper interval [4.1, 3.9]
+        Y[1] = KaucherInterval(-0.1, 0.1).dual(); // Improper interval [0.1, -0.1]
         
         std::cout << "   Y = " << Y << std::endl;
         
-        // 6. 内包围验证
+        // 6. Inner enclosure verification
         std::cout << "\n6. Inner enclosure verification...\n";
         bool inner_inclusion = verify_inner_inclusion(result.solution, Y, f);
         
         std::cout << "\n7. Final result: " << (inner_inclusion ? "✓ Inner enclosure verified" : "✗ Inner enclosure failed") << std::endl;
         
-        // 7. 额外验证：检查四个角点
+        // 7. Additional verification: Check four corner points
         std::cout << "\n8. Corner point verification...\n";
         
-        // 定义点函数f
+        // Define point function f
         auto point_f = [](double x1, double x2) -> std::array<double, 2> {
             return {
                 x1 * x1 + x2 * x2,
@@ -343,21 +345,21 @@ int main()
             auto [x1, x2] = corners[i];
             auto fx = point_f(x1, x2);
             
-            // 检查是否在目标Y内（考虑容差）
+            // Check if within target Y (considering tolerance)
             bool in_y1 = (fx[0] >= 3.9 && fx[0] <= 4.1);
             bool in_y2 = (fx[1] >= -0.1 && fx[1] <= 0.1);
             
-            std::cout << "   角点 " << i+1 << " (" << x1 << ", " << x2 << "): "
+            std::cout << "   Corner " << i+1 << " (" << x1 << ", " << x2 << "): "
                       << "f = (" << fx[0] << ", " << fx[1] << ") - "
-                      << (in_y1 && in_y2 ? "✓ 有效" : "✗ 无效") << std::endl;
+                      << (in_y1 && in_y2 ? "✓ Valid" : "✗ Invalid") << std::endl;
         }
     }
     else
     {
         std::cout << "   ✗ Krawczyk iteration failed!\n";
-        std::cout << "   消息: " << result.message << std::endl;
-        std::cout << "   最终区间: " << result.solution << std::endl;
-        std::cout << "   最终宽度: " << result.finalWidth << std::endl;
+        std::cout << "   Message: " << result.message << std::endl;
+        std::cout << "   Final interval: " << result.solution << std::endl;
+        std::cout << "   Final width: " << result.finalWidth << std::endl;
     }
     
     std::cout << "\n=== Test Completed ===\n";

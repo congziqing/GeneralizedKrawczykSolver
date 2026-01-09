@@ -5,7 +5,7 @@
 #include <cmath>
 #include <array>
 #include <Eigen/Dense>
-#include "PSGMDirectedInterval.h"
+#include "../include/interval_krawczyk/KaucherInterval.h"
 #include "IntervalVector.h"
 #include "IntervalMatrix.h"
 
@@ -134,7 +134,7 @@ public:
             FixedIntervalVector<N> c_vec;
             for (size_t i = 0; i < N; ++i)
             {
-                c_vec[i] = PSGMDirectedInterval(c(i), c(i));
+                c_vec[i] = ik::KaucherInterval(c(i), c(i));
             }
             
             // 计算f(c)
@@ -165,7 +165,7 @@ public:
                 {
                     val -= Y(static_cast<int>(i), static_cast<int>(j)) * f_c[j].middle();
                 }
-                term1[i] = PSGMDirectedInterval(val, val);
+                term1[i] = ik::KaucherInterval(val, val);
             }
             
             // 计算I - Y * J(x)
@@ -179,7 +179,7 @@ public:
                 for (size_t j = 0; j < N; ++j)
                 {
                     double val = I_minus_YJ(static_cast<int>(i), static_cast<int>(j));
-                    I_minus_YJ_interval(i, j) = PSGMDirectedInterval(val, val);
+                    I_minus_YJ_interval(i, j) = ik::KaucherInterval(val, val);
                 }
             }
             
@@ -188,7 +188,7 @@ public:
             for (size_t i = 0; i < N; ++i)
             {
                 double delta = (current[i].upper() - current[i].lower()) / 2.0;
-                box_minus_c[i] = PSGMDirectedInterval(-delta, delta);
+                box_minus_c[i] = ik::KaucherInterval(-delta, delta);
             }
             
             // 计算term3: (I - YJ) * (box - c)
@@ -242,7 +242,7 @@ bool verify_inner_inclusion(const FixedIntervalVector<N>& X,
             if (fX[i].isProper() && !Y[i].isProper())
             {
                 // 检查fX是否包含在Y的对偶区间内
-                PSGMDirectedInterval Y_dual = Y[i].dual();
+                ik::KaucherInterval Y_dual = Y[i].dual();
                 if (!(fX[i].lower() > Y_dual.lower() && fX[i].upper() < Y_dual.upper()))
                 {
                     return false;
@@ -278,8 +278,8 @@ void testToleranceEmbedding2D()
     
     // 目标Y：使用improper区间表示对偶形式
     FixedIntervalVector<2> Y;
-    Y[0] = PSGMDirectedInterval(3.9, 4.1).dual(); // 非正常区间 [4.1, 3.9]
-    Y[1] = PSGMDirectedInterval(-0.1, 0.1).dual(); // 非正常区间 [0.1, -0.1]
+    Y[0] = ik::KaucherInterval(3.9, 4.1).dual(); // Improper interval [4.1, 3.9]
+    Y[1] = ik::KaucherInterval(-0.1, 0.1).dual(); // Improper interval [0.1, -0.1]
     
     std::cout << "目标Y（improper）: " << Y << std::endl;
     
@@ -294,10 +294,10 @@ void testToleranceEmbedding2D()
     // 定义雅可比矩阵
     auto jacobian = [](const FixedIntervalVector<2>& x) -> FixedIntervalMatrix<2, 2> {
         FixedIntervalMatrix<2, 2> J;
-        J(0, 0) = x[0] * PSGMDirectedInterval(2.0);
-        J(0, 1) = x[1] * PSGMDirectedInterval(2.0);
-        J(1, 0) = PSGMDirectedInterval(1.0);
-        J(1, 1) = PSGMDirectedInterval(-1.0);
+        J(0, 0) = x[0] * ik::KaucherInterval(2.0);
+        J(0, 1) = x[1] * ik::KaucherInterval(2.0);
+        J(1, 0) = ik::KaucherInterval(1.0);
+        J(1, 1) = ik::KaucherInterval(-1.0);
         return J;
     };
     
@@ -340,8 +340,8 @@ void testToleranceEmbedding2D()
     std::cout << "\n2. 构造小初始区间...\n";
     double delta = 0.1; // 小区间半径
     FixedIntervalVector<2> X0;
-    X0[0] = PSGMDirectedInterval(x1_star - delta, x1_star + delta);
-    X0[1] = PSGMDirectedInterval(x2_star - delta, x2_star + delta);
+    X0[0] = ik::KaucherInterval(x1_star - delta, x1_star + delta);
+    X0[1] = ik::KaucherInterval(x2_star - delta, x2_star + delta);
     
     std::cout << "   初始区间X0: " << X0 << std::endl;
     std::cout << "   区间宽度: " << X0[0].magnitude() << " × " << X0[1].magnitude() << std::endl;
@@ -414,7 +414,7 @@ void testToleranceEmbedding1D()
     
     // 目标Y：使用improper区间表示对偶形式
     FixedIntervalVector<1> Y;
-    Y[0] = PSGMDirectedInterval(1.9, 2.1).dual(); // 非正常区间 [2.1, 1.9]
+    Y[0] = ik::KaucherInterval(1.9, 2.1).dual(); // Improper interval [2.1, 1.9]
     
     std::cout << "目标Y（improper）: " << Y << std::endl;
     
@@ -428,7 +428,7 @@ void testToleranceEmbedding1D()
     // 定义雅可比矩阵
     auto jacobian = [](const FixedIntervalVector<1>& x) -> FixedIntervalMatrix<1, 1> {
         FixedIntervalMatrix<1, 1> J;
-        J(0, 0) = x[0] * PSGMDirectedInterval(2.0);
+        J(0, 0) = x[0] * ik::KaucherInterval(2.0);
         return J;
     };
     
@@ -454,7 +454,7 @@ void testToleranceEmbedding1D()
     std::cout << "\n2. 构造小初始区间...\n";
     double delta = 0.1;
     FixedIntervalVector<1> X0;
-    X0[0] = PSGMDirectedInterval(x_star - delta, x_star + delta);
+    X0[0] = ik::KaucherInterval(x_star - delta, x_star + delta);
     
     std::cout << "   初始区间X0: " << X0 << std::endl;
     
@@ -494,8 +494,8 @@ int main()
     
     // 展示Kaucher区间算术的基本特性
     std::cout << "=== Kaucher区间算术特性 ===\n";
-    PSGMDirectedInterval proper(1.0, 2.0);
-    PSGMDirectedInterval improper(2.0, 1.0);
+    ik::KaucherInterval proper(1.0, 2.0);
+    ik::KaucherInterval improper(2.0, 1.0);
     
     std::cout << "正常区间 a = " << proper << std::endl;
     std::cout << "非正常区间 b = " << improper << std::endl;

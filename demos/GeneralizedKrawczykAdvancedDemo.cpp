@@ -3,7 +3,7 @@
 #include <iostream>
 #include <vector>
 #include <cmath>
-#include "../include/interval_krawczyk/PSGMDirectedInterval.h"
+#include "../include/interval_krawczyk/KaucherInterval.h"
 #include "../include/interval_krawczyk/IntervalVector.h"
 #include "../include/interval_krawczyk/IntervalMatrix.h"
 #include "../include/interval_krawczyk/GeneralizedKrawczykSolver.h"
@@ -21,7 +21,7 @@ void verifySolution(const std::string& desc,
     for (size_t i = 0; i < solution.Size; ++i)
     {
         double mid = solution[i].middle();
-        c_vec[i] = PSGMDirectedInterval(mid, mid);
+        c_vec[i] = ik::KaucherInterval(mid, mid);
         std::cout << "  x[" << i << "] = " << mid << std::endl;
     }
     
@@ -48,17 +48,17 @@ void testSimpleSystem()
     
     auto f = [](const ik::IntervalVector<2>& x) -> ik::IntervalVector<2> {
         ik::IntervalVector<2> result;
-        result[0] = x[0] * x[0] + x[1] * x[1] - PSGMDirectedInterval(4.0, 4.0);
+        result[0] = x[0] * x[0] + x[1] * x[1] - ik::KaucherInterval(4.0, 4.0);
         result[1] = x[0] - x[1];
         return result;
     };
 
     auto jacobian = [](const ik::IntervalVector<2>& x) -> ik::IntervalMatrix<2, 2> {
         ik::IntervalMatrix<2, 2> J;
-        J(0, 0) = x[0] * PSGMDirectedInterval(2.0);
-        J(0, 1) = x[1] * PSGMDirectedInterval(2.0);
-        J(1, 0) = PSGMDirectedInterval(1.0);
-        J(1, 1) = PSGMDirectedInterval(-1.0);
+        J(0, 0) = x[0] * ik::KaucherInterval(2.0);
+        J(0, 1) = x[1] * ik::KaucherInterval(2.0);
+        J(1, 0) = ik::KaucherInterval(1.0);
+        J(1, 1) = ik::KaucherInterval(-1.0);
         return J;
     };
     
@@ -66,8 +66,8 @@ void testSimpleSystem()
     
     // Use proper interval
     ik::IntervalVector<2> initialBox;
-    initialBox[0] = PSGMDirectedInterval(0.5, 2.5);
-    initialBox[1] = PSGMDirectedInterval(0.5, 2.5);
+    initialBox[0] = ik::KaucherInterval(0.5, 2.5);
+    initialBox[1] = ik::KaucherInterval(0.5, 2.5);
     
     std::cout << "Initial interval: " << initialBox << std::endl;
     
@@ -98,20 +98,20 @@ void testCubicEquation()
     
     auto f = [](const ik::IntervalVector<1>& x) -> ik::IntervalVector<1> {
         ik::IntervalVector<1> result;
-        result[0] = x[0] * x[0] * x[0] - x[0] - PSGMDirectedInterval(1.0, 1.0);
+        result[0] = x[0] * x[0] * x[0] - x[0] - ik::KaucherInterval(1.0, 1.0);
         return result;
     };
 
     auto jacobian = [](const ik::IntervalVector<1>& x) -> ik::IntervalMatrix<1, 1> {
         ik::IntervalMatrix<1, 1> J;
-        J(0, 0) = x[0] * x[0] * PSGMDirectedInterval(3.0) - PSGMDirectedInterval(1.0);
+        J(0, 0) = x[0] * x[0] * ik::KaucherInterval(3.0) - ik::KaucherInterval(1.0);
         return J;
     };
     
     ik::GeneralizedKrawczykSolver<1> solver(f, jacobian);
     
     ik::IntervalVector<1> initialBox;
-    initialBox[0] = PSGMDirectedInterval(1.0, 2.0);
+    initialBox[0] = ik::KaucherInterval(1.0, 2.0);
     
     std::cout << "Initial interval: " << initialBox << std::endl;
     
@@ -142,25 +142,25 @@ void testQuadraticSystem()
     
     auto f = [](const ik::IntervalVector<2>& x) -> ik::IntervalVector<2> {
         ik::IntervalVector<2> result;
-        result[0] = x[0] * x[0] + x[1] - PSGMDirectedInterval(2.0, 2.0);
+        result[0] = x[0] * x[0] + x[1] - ik::KaucherInterval(2.0, 2.0);
         result[1] = x[0] - x[1];
         return result;
     };
 
     auto jacobian = [](const ik::IntervalVector<2>& x) -> ik::IntervalMatrix<2, 2> {
         ik::IntervalMatrix<2, 2> J;
-        J(0, 0) = x[0] * PSGMDirectedInterval(2.0);
-        J(0, 1) = PSGMDirectedInterval(1.0);
-        J(1, 0) = PSGMDirectedInterval(1.0);
-        J(1, 1) = PSGMDirectedInterval(-1.0);
+        J(0, 0) = x[0] * ik::KaucherInterval(2.0);
+        J(0, 1) = ik::KaucherInterval(1.0);
+        J(1, 0) = ik::KaucherInterval(1.0);
+        J(1, 1) = ik::KaucherInterval(-1.0);
         return J;
     };
     
     ik::GeneralizedKrawczykSolver<2> solver(f, jacobian);
     
     ik::IntervalVector<2> initialBox;
-    initialBox[0] = PSGMDirectedInterval(0.5, 1.5);
-    initialBox[1] = PSGMDirectedInterval(0.5, 1.5);
+    initialBox[0] = ik::KaucherInterval(0.5, 1.5);
+    initialBox[1] = ik::KaucherInterval(0.5, 1.5);
     
     std::cout << "Initial interval: " << initialBox << std::endl;
     
@@ -191,13 +191,13 @@ void testImproperInterval()
     
     auto f = [](const ik::IntervalVector<1>& x) -> ik::IntervalVector<1> {
         ik::IntervalVector<1> result;
-        result[0] = x[0] * x[0] - PSGMDirectedInterval(2.0, 2.0);
+        result[0] = x[0] * x[0] - ik::KaucherInterval(2.0, 2.0);
         return result;
     };
 
     auto jacobian = [](const ik::IntervalVector<1>& x) -> ik::IntervalMatrix<1, 1> {
         ik::IntervalMatrix<1, 1> J;
-        J(0, 0) = x[0] * PSGMDirectedInterval(2.0);
+        J(0, 0) = x[0] * ik::KaucherInterval(2.0);
         return J;
     };
     
@@ -205,7 +205,7 @@ void testImproperInterval()
     
     // Use improper interval (demonstrating Kaucher arithmetic)
     ik::IntervalVector<1> initialBox;
-    initialBox[0] = PSGMDirectedInterval(2.0, 1.0); // Improper interval
+    initialBox[0] = ik::KaucherInterval(2.0, 1.0); // Improper interval
     
     std::cout << "Initial interval: " << initialBox << std::endl;
     std::cout << "Initial interval type: " << (initialBox[0].isProper() ? "Proper" : "Improper") << std::endl;
@@ -237,7 +237,7 @@ void testTrigonometricEquation()
     
     auto f = [](const ik::IntervalVector<1>& x) -> ik::IntervalVector<1> {
         ik::IntervalVector<1> result;
-        result[0] = ::interval::sin(x[0]) - PSGMDirectedInterval(0.5, 0.5);
+        result[0] = ::interval::sin(x[0]) - ik::KaucherInterval(0.5, 0.5);
         return result;
     };
 
@@ -250,7 +250,7 @@ void testTrigonometricEquation()
     ik::GeneralizedKrawczykSolver<1> solver(f, jacobian);
     
     ik::IntervalVector<1> initialBox;
-    initialBox[0] = PSGMDirectedInterval(0.0, 1.0);
+    initialBox[0] = ik::KaucherInterval(0.0, 1.0);
     
     std::cout << "Initial interval: " << initialBox << std::endl;
     
@@ -281,17 +281,17 @@ void testAllSolutions()
     
     auto f = [](const ik::IntervalVector<2>& x) -> ik::IntervalVector<2> {
         ik::IntervalVector<2> result;
-        result[0] = x[0] * x[0] + x[1] * x[1] - PSGMDirectedInterval(4.0, 4.0);
+        result[0] = x[0] * x[0] + x[1] * x[1] - ik::KaucherInterval(4.0, 4.0);
         result[1] = x[0] - x[1];
         return result;
     };
 
     auto jacobian = [](const ik::IntervalVector<2>& x) -> ik::IntervalMatrix<2, 2> {
         ik::IntervalMatrix<2, 2> J;
-        J(0, 0) = x[0] * PSGMDirectedInterval(2.0);
-        J(0, 1) = x[1] * PSGMDirectedInterval(2.0);
-        J(1, 0) = PSGMDirectedInterval(1.0);
-        J(1, 1) = PSGMDirectedInterval(-1.0);
+        J(0, 0) = x[0] * ik::KaucherInterval(2.0);
+        J(0, 1) = x[1] * ik::KaucherInterval(2.0);
+        J(1, 0) = ik::KaucherInterval(1.0);
+        J(1, 1) = ik::KaucherInterval(-1.0);
         return J;
     };
     
@@ -299,8 +299,8 @@ void testAllSolutions()
     
     // Use larger initial interval to find all solutions
     ik::IntervalVector<2> initialBox;
-    initialBox[0] = PSGMDirectedInterval(-3.0, 3.0);
-    initialBox[1] = PSGMDirectedInterval(-3.0, 3.0);
+    initialBox[0] = ik::KaucherInterval(-3.0, 3.0);
+    initialBox[1] = ik::KaucherInterval(-3.0, 3.0);
     
     std::cout << "Initial interval: " << initialBox << std::endl;
     
@@ -328,8 +328,8 @@ int main()
     
     // Show basic properties of Kaucher interval arithmetic
     std::cout << "=== Kaucher Interval Arithmetic Properties ===\n";
-    PSGMDirectedInterval proper(1.0, 2.0);
-    PSGMDirectedInterval improper(2.0, 1.0);
+    ik::KaucherInterval proper(1.0, 2.0);
+    ik::KaucherInterval improper(2.0, 1.0);
     
     std::cout << "Proper interval a = " << proper << std::endl;
     std::cout << "Improper interval b = " << improper << std::endl;

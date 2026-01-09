@@ -314,7 +314,7 @@ struct IntervalMatrixAbs
         IntervalMatrix<M3, N3> result;
         for (size_t i = 0; i < M3; ++i)
             for (size_t j = 0; j < N3; ++j)
-                result.data[i][j] = PSGMDirectedInterval(m.data[i][j].absoluteValue());
+                result.data[i][j] = KaucherInterval(m.data[i][j].absoluteValue());
         return result;
     }
 };

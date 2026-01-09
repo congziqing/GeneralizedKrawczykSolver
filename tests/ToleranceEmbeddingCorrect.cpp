@@ -10,13 +10,13 @@
 // Helper function: create midpoint interval
 KaucherInterval midPointInterval(double x)
 {
-    return PSGMDirectedInterval(x, x);
+    return KaucherInterval(x, x);
 }
 
 // Helper function: create dual interval (Kaucher dual)
-PSGMDirectedInterval dualInterval(const PSGMDirectedInterval& interval)
+KaucherInterval dualInterval(const KaucherInterval& interval)
 {
-    return PSGMDirectedInterval(interval.upper(), interval.lower());
+    return KaucherInterval(interval.upper(), interval.lower());
 }
 
 // 定义系统方程 f(x) = Y
@@ -27,12 +27,12 @@ void toleranceEmbeddingCorrect()
     
     // 已知目标输出范围 Y = ([2.9, 3.1], [4.9, 5.1])^T
     // 为了求解内包围，需要将Y转换为对偶形式（Improper Interval）
-    PSGMDirectedInterval y1_normal(2.9, 3.1);
-    PSGMDirectedInterval y2_normal(4.9, 5.1);
+    KaucherInterval y1_normal(2.9, 3.1);
+    KaucherInterval y2_normal(4.9, 5.1);
     
-    // 转换为对偶形式，触发内包围求解模式
-    PSGMDirectedInterval y1_dual = dualInterval(y1_normal);
-    PSGMDirectedInterval y2_dual = dualInterval(y2_normal);
+    // Convert to dual form, triggering inner enclosure solving mode
+    KaucherInterval y1_dual = dualInterval(y1_normal);
+    KaucherInterval y2_dual = dualInterval(y2_normal);
     
     std::cout << "Target output range Y (proper interval):\n";
     std::cout << "  y1 = " << y1_normal << std::endl;
@@ -74,8 +74,8 @@ void toleranceEmbeddingCorrect()
     
     // 初始区间 X0 = ([0, 5], [0, 5])^T
     ik::IntervalVector<2> xn;
-    xn[0] = PSGMDirectedInterval(0.0, 5.0);
-    xn[1] = PSGMDirectedInterval(0.0, 5.0);
+    xn[0] = KaucherInterval(0.0, 5.0);
+    xn[1] = KaucherInterval(0.0, 5.0);
     
     std::cout << "\nInitial interval X0:\n";
     std::cout << "  x1 = " << xn[0] << std::endl;
@@ -163,8 +163,8 @@ void toleranceEmbeddingCorrect()
         ik::IntervalVector<2> box_minus_c;
         double delta1 = (xn[0].upper() - xn[0].lower()) / 2.0;
         double delta2 = (xn[1].upper() - xn[1].lower()) / 2.0;
-        box_minus_c[0] = PSGMDirectedInterval(-delta1, delta1);
-        box_minus_c[1] = PSGMDirectedInterval(-delta2, delta2);
+        box_minus_c[0] = KaucherInterval(-delta1, delta1);
+        box_minus_c[1] = KaucherInterval(-delta2, delta2);
         std::cout << "  box - c = " << box_minus_c << std::endl;
         
         // 10. 计算 term3 = (I - YJ) * (box - c)（区间矩阵-向量乘法）

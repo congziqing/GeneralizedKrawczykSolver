@@ -3,7 +3,7 @@
 #include <iostream>
 #include <vector>
 #include <cmath>
-#include "PSGMDirectedInterval.h"
+#include "../include/interval_krawczyk/KaucherInterval.h"
 #include "IntervalVector.h"
 #include "IntervalMatrix.h"
 #include "GeneralizedKrawczykSolver.h"
@@ -17,8 +17,8 @@ void testSimpleSystem()
     GeneralizedKrawczykSolver solver(2, simpleFunction, simpleJacobian, 1e-8, 100, 100);
     
     IntervalVector initialBox(2);
-    initialBox[0] = PSGMDirectedInterval(0.5, 2.5);
-    initialBox[1] = PSGMDirectedInterval(0.5, 2.5);
+    initialBox[0] = ik::KaucherInterval(0.5, 2.5);
+    initialBox[1] = ik::KaucherInterval(0.5, 2.5);
     
     auto result = solver.solve(initialBox);
     
@@ -44,20 +44,20 @@ void testCubicEquation()
     
     auto f = [](const IntervalVector& x) -> IntervalVector {
         IntervalVector result(1);
-        result[0] = x[0] * x[0] * x[0] - x[0] - PSGMDirectedInterval(1.0, 1.0);
+        result[0] = x[0] * x[0] * x[0] - x[0] - ik::KaucherInterval(1.0, 1.0);
         return result;
     };
 
     auto jacobian = [](const IntervalVector& x) -> IntervalMatrix {
         IntervalMatrix J(1, 1);
-        J[0][0] = x[0] * x[0] * PSGMDirectedInterval(3.0) - PSGMDirectedInterval(1.0);
+        J[0][0] = x[0] * x[0] * ik::KaucherInterval(3.0) - ik::KaucherInterval(1.0);
         return J;
     };
     
     GeneralizedKrawczykSolver solver(1, f, jacobian, 1e-8, 100, 100);
     
     IntervalVector initialBox(1);
-    initialBox[0] = PSGMDirectedInterval(1.0, 2.0);
+    initialBox[0] = ik::KaucherInterval(1.0, 2.0);
     
     auto result = solver.solve(initialBox);
     
@@ -83,25 +83,25 @@ void testQuadraticEquation()
     
     auto f = [](const IntervalVector& x) -> IntervalVector {
         IntervalVector result(2);
-        result[0] = x[0] * x[0] + x[1] - PSGMDirectedInterval(2.0, 2.0);
+        result[0] = x[0] * x[0] + x[1] - ik::KaucherInterval(2.0, 2.0);
         result[1] = x[0] - x[1];
         return result;
     };
 
     auto jacobian = [](const IntervalVector& x) -> IntervalMatrix {
         IntervalMatrix J(2, 2);
-        J[0][0] = x[0] * PSGMDirectedInterval(2.0);
-        J[0][1] = PSGMDirectedInterval(1.0);
-        J[1][0] = PSGMDirectedInterval(1.0);
-        J[1][1] = PSGMDirectedInterval(-1.0);
+        J[0][0] = x[0] * ik::KaucherInterval(2.0);
+        J[0][1] = ik::KaucherInterval(1.0);
+        J[1][0] = ik::KaucherInterval(1.0);
+        J[1][1] = ik::KaucherInterval(-1.0);
         return J;
     };
     
     GeneralizedKrawczykSolver solver(2, f, jacobian, 1e-8, 100, 100);
     
     IntervalVector initialBox(2);
-    initialBox[0] = PSGMDirectedInterval(0.5, 1.5);
-    initialBox[1] = PSGMDirectedInterval(0.5, 1.5);
+    initialBox[0] = ik::KaucherInterval(0.5, 1.5);
+    initialBox[1] = ik::KaucherInterval(0.5, 1.5);
     
     auto result = solver.solve(initialBox);
     
@@ -130,8 +130,8 @@ void testAllSolutions()
     GeneralizedKrawczykSolver solver(2, simpleFunction, simpleJacobian);
     
     IntervalVector initialBox(2);
-    initialBox[0] = PSGMDirectedInterval(0.5, 2.5);
-    initialBox[1] = PSGMDirectedInterval(0.5, 2.5);
+    initialBox[0] = ik::KaucherInterval(0.5, 2.5);
+    initialBox[1] = ik::KaucherInterval(0.5, 2.5);
     
     auto solutions = solver.solveAll(initialBox);
     

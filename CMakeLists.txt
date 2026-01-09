@@ -4,7 +4,7 @@ project(GeneralizedKrawczykSolver)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# 自动下载Eigen库
+# Auto-download Eigen library
 include(FetchContent)
 FetchContent_Declare(
     eigen
@@ -15,7 +15,7 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(eigen)
 
-# 创建库
+# Create library
 add_library(IntervalKrawczyk STATIC
     include/interval_krawczyk/KaucherInterval.h
     include/interval_krawczyk/IntervalVector.h
@@ -23,16 +23,16 @@ add_library(IntervalKrawczyk STATIC
     include/interval_krawczyk/GeneralizedKrawczykSolver.h
 )
 
-# 设置库的包含目录
+# Set library include directories
 target_include_directories(IntervalKrawczyk PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
 )
 
-# 链接Eigen库
+# Link Eigen library
 target_link_libraries(IntervalKrawczyk PUBLIC Eigen3::Eigen)
 
-# 安装库
+# Install library
 install(TARGETS IntervalKrawczyk
     EXPORT IntervalKrawczykTargets
     LIBRARY DESTINATION lib
@@ -52,7 +52,7 @@ install(DIRECTORY include/interval_krawczyk
     FILES_MATCHING PATTERN "*.h"
 )
 
-# 生成配置文件
+# Generate configuration files
 include(CMakePackageConfigHelpers)
 write_basic_package_version_file(
     "${CMAKE_CURRENT_BINARY_DIR}/IntervalKrawczykConfigVersion.cmake"
@@ -72,9 +72,9 @@ install(FILES
     DESTINATION lib/cmake/IntervalKrawczyk
 )
 
-# 添加测试
+# Add tests
 enable_testing()
 add_subdirectory(tests)
 
-# 添加演示程序
+# Add demos
 add_subdirectory(demos)

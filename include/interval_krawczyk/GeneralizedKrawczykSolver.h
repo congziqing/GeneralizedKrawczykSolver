@@ -164,7 +164,7 @@ private:
                 for (size_t i = 0; i < N; ++i)
                 {
                     double delta = tolerance_ / 2.0;
-                    smallInterval[i] = PSGMDirectedInterval(c(i) - delta, c(i) + delta);
+                    smallInterval[i] = KaucherInterval(c(i) - delta, c(i) + delta);
                 }
                 return createSuccessResult(smallInterval, iter + 1);
             }
@@ -201,7 +201,7 @@ private:
                 {
                     val -= Y(static_cast<int>(i), static_cast<int>(j)) * f_c[j].middle();
                 }
-                term1[i] = PSGMDirectedInterval(val, val);
+                term1[i] = KaucherInterval(val, val);
             }
 
             // Compute I - Y * J(x) using interval arithmetic
@@ -211,13 +211,13 @@ private:
                 for (size_t j = 0; j < N; ++j)
                 {
                     // Start with identity matrix element
-                    PSGMDirectedInterval identity_ij = (i == j) ? PSGMDirectedInterval(1.0, 1.0) : PSGMDirectedInterval(0.0, 0.0);
+                    KaucherInterval identity_ij = (i == j) ? KaucherInterval(1.0, 1.0) : KaucherInterval(0.0, 0.0);
                     
                     // Subtract Y * J_interval
-                    PSGMDirectedInterval yj_ij(0.0, 0.0);
+                    KaucherInterval yj_ij(0.0, 0.0);
                     for (size_t k = 0; k < N; ++k)
                     {
-                        yj_ij = yj_ij + PSGMDirectedInterval(Y(static_cast<int>(i), static_cast<int>(k)), Y(static_cast<int>(i), static_cast<int>(k))) * J_interval(k, j);
+                        yj_ij = yj_ij + KaucherInterval(Y(static_cast<int>(i), static_cast<int>(k)), Y(static_cast<int>(i), static_cast<int>(k))) * J_interval(k, j);
                     }
                     
                     I_minus_YJ_interval(i, j) = identity_ij - yj_ij;
@@ -229,14 +229,14 @@ private:
             for (size_t i = 0; i < N; ++i)
             {
                 double delta = (current[i].upper() - current[i].lower()) / 2.0;
-                box_minus_c[i] = PSGMDirectedInterval(-delta, delta);
+                box_minus_c[i] = KaucherInterval(-delta, delta);
             }
 
             // Compute term3: (I - YJ) * (box - c)
             IntervalVector<N> term3;
             for (size_t i = 0; i < N; ++i)
             {
-                PSGMDirectedInterval sum(0.0, 0.0);
+                KaucherInterval sum(0.0, 0.0);
                 for (size_t j = 0; j < N; ++j)
                 {
                     sum = sum + I_minus_YJ_interval(i, j) * box_minus_c[j];
@@ -308,10 +308,10 @@ private:
         double mid = box[maxIdx].middle();
 
         IntervalVector<N> box1 = box;
-        box1[maxIdx] = PSGMDirectedInterval(box[maxIdx].lower(), mid);
+        box1[maxIdx] = KaucherInterval(box[maxIdx].lower(), mid);
 
         IntervalVector<N> box2 = box;
-        box2[maxIdx] = PSGMDirectedInterval(mid, box[maxIdx].upper());
+        box2[maxIdx] = KaucherInterval(mid, box[maxIdx].upper());
 
         result.push_back(box1);
         result.push_back(box2);
@@ -349,7 +349,7 @@ namespace generalized_krawczyk
     inline IntervalVector<2> simpleFunction(const IntervalVector<2>& x)
     {
         IntervalVector<2> result;
-        result[0] = x[0] * x[0] + x[1] * x[1] - PSGMDirectedInterval(4.0, 4.0);
+        result[0] = x[0] * x[0] + x[1] * x[1] - KaucherInterval(4.0, 4.0);
         result[1] = x[0] - x[1];
         return result;
     }
@@ -357,38 +357,38 @@ namespace generalized_krawczyk
     inline IntervalMatrix<2, 2> simpleJacobian(const IntervalVector<2>& x)
     {
         IntervalMatrix<2, 2> J;
-        J(0, 0) = x[0] * PSGMDirectedInterval(2.0);
-        J(0, 1) = x[1] * PSGMDirectedInterval(2.0);
-        J(1, 0) = PSGMDirectedInterval(1.0);
-        J(1, 1) = PSGMDirectedInterval(-1.0);
+        J(0, 0) = x[0] * KaucherInterval(2.0);
+        J(0, 1) = x[1] * KaucherInterval(2.0);
+        J(1, 0) = KaucherInterval(1.0);
+        J(1, 1) = KaucherInterval(-1.0);
         return J;
     }
 
     inline IntervalVector<1> cubicFunction(const IntervalVector<1>& x)
     {
         IntervalVector<1> result;
-        result[0] = x[0] * x[0] * x[0] - PSGMDirectedInterval(1.0, 1.0);
+        result[0] = x[0] * x[0] * x[0] - KaucherInterval(1.0, 1.0);
         return result;
     }
 
     inline IntervalMatrix<1, 1> cubicJacobian(const IntervalVector<1>& x)
     {
         IntervalMatrix<1, 1> J;
-        J(0, 0) = PSGMDirectedInterval(3.0) * x[0] * x[0];
+        J(0, 0) = KaucherInterval(3.0) * x[0] * x[0];
         return J;
     }
 
     inline IntervalVector<1> quadraticFunction(const IntervalVector<1>& x)
     {
         IntervalVector<1> result;
-        result[0] = x[0] * x[0] - PSGMDirectedInterval(2.0, 2.0);
+        result[0] = x[0] * x[0] - KaucherInterval(2.0, 2.0);
         return result;
     }
 
     inline IntervalMatrix<1, 1> quadraticJacobian(const IntervalVector<1>& x)
     {
         IntervalMatrix<1, 1> J;
-        J(0, 0) = x[0] * PSGMDirectedInterval(2.0);
+        J(0, 0) = x[0] * KaucherInterval(2.0);
         return J;
     }
 }

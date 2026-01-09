@@ -10,13 +10,13 @@
 // Helper function: create midpoint interval
 KaucherInterval midPointInterval(double x)
 {
-    return PSGMDirectedInterval(x, x);
+    return KaucherInterval(x, x);
 }
 
 // Helper function: create dual interval (Kaucher dual)
-PSGMDirectedInterval dualInterval(const PSGMDirectedInterval& interval)
+KaucherInterval dualInterval(const KaucherInterval& interval)
 {
-    return PSGMDirectedInterval(interval.upper(), interval.lower());
+    return KaucherInterval(interval.upper(), interval.lower());
 }
 
 // 定义系统方程 f(x) = Y
@@ -27,12 +27,12 @@ void toleranceEmbeddingTest()
     
     // 已知目标输出范围 Y = ([2.9, 3.1], [4.9, 5.1])^T
     // 为了求解内包围，需要将Y转换为对偶形式（Improper Interval）
-    PSGMDirectedInterval y1_normal(2.9, 3.1);
-    PSGMDirectedInterval y2_normal(4.9, 5.1);
+    KaucherInterval y1_normal(2.9, 3.1);
+    KaucherInterval y2_normal(4.9, 5.1);
     
-    // 转换为对偶形式，触发内包围求解模式
-    PSGMDirectedInterval y1_dual = dualInterval(y1_normal);
-    PSGMDirectedInterval y2_dual = dualInterval(y2_normal);
+    // Convert to dual form, triggering inner enclosure solving mode
+    KaucherInterval y1_dual = dualInterval(y1_normal);
+    KaucherInterval y2_dual = dualInterval(y2_normal);
     
     std::cout << "Target output range Y (proper interval):\n";
     std::cout << "  y1 = " << y1_normal << std::endl;
@@ -44,8 +44,8 @@ void toleranceEmbeddingTest()
     
     // 初始区间 X0 = ([0, 5], [0, 5])^T
     ik::IntervalVector<2> xn;
-    xn[0] = PSGMDirectedInterval(0.0, 5.0);
-    xn[1] = PSGMDirectedInterval(0.0, 5.0);
+    xn[0] = KaucherInterval(0.0, 5.0);
+    xn[1] = KaucherInterval(0.0, 5.0);
     
     std::cout << "\nInitial interval X0:\n";
     std::cout << "  x1 = " << xn[0] << std::endl;
@@ -132,8 +132,8 @@ void toleranceEmbeddingTest()
         std::cout << "  term3 = ([" << term3_1_lower << ", " << term3_1_upper << "], [" << term3_2_lower << ", " << term3_2_upper << "])" << std::endl;
         
         // 9. 计算 Krawczyk 区间 K = term1 + term3
-        PSGMDirectedInterval K1(term1_eigen(0) + term3_1_lower, term1_eigen(0) + term3_1_upper);
-        PSGMDirectedInterval K2(term1_eigen(1) + term3_2_lower, term1_eigen(1) + term3_2_upper);
+        KaucherInterval K1(term1_eigen(0) + term3_1_lower, term1_eigen(0) + term3_1_upper);
+        KaucherInterval K2(term1_eigen(1) + term3_2_lower, term1_eigen(1) + term3_2_upper);
         
         ik::IntervalVector<2> K;
         K[0] = K1;
