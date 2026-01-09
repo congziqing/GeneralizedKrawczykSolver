@@ -12,10 +12,10 @@ void printResult(const std::string& title, bool success, const std::string& msg,
 
     if (success)
     {
-        std::cout << "✓ 成功!" << std::endl;
-        std::cout << "解区间: " << sol << std::endl;
-        std::cout << "宽度: " << std::scientific << width << std::endl;
-        std::cout << "中点: (";
+        std::cout << "✓ Success!" << std::endl;
+        std::cout << "Solution Interval: " << sol << std::endl;
+        std::cout << "Width: " << std::scientific << width << std::endl;
+        std::cout << "Midpoint: (";
         for (size_t i = 0; i < N; ++i)
         {
             std::cout << sol[i].mid();
@@ -25,7 +25,7 @@ void printResult(const std::string& title, bool success, const std::string& msg,
     }
     else
     {
-        std::cout << "✗ 失败: " << msg << std::endl;
+        std::cout << "✗ Failed: " << msg << std::endl;
     }
     std::cout << std::string(60, '=') << std::endl;
 }
@@ -33,8 +33,8 @@ void printResult(const std::string& title, bool success, const std::string& msg,
 void testSimpleSystem()
 {
     std::cout << "\n" << std::string(60, '*') << std::endl;
-    std::cout << "测试1: x^2 + y^2 = 4, x = y" << std::endl;
-    std::cout << "预期解: (1.414, 1.414)" << std::endl;
+    std::cout << "Test 1: x^2 + y^2 = 4, x = y" << std::endl;
+    std::cout << "Expected Solution: (1.414, 1.414)" << std::endl;
     std::cout << std::string(60, '*') << std::endl;
 
     auto f = [](const IntervalVec<2>& x) -> IntervalVec<2>
@@ -61,9 +61,9 @@ void testSimpleSystem()
     initial[0] = Interval(0.5, 2.5);
     initial[1] = Interval(0.5, 2.5);
 
-    std::cout << "初始区间: " << initial << std::endl;
+    std::cout << "Initial Interval: " << initial << std::endl;
     auto result = solver.solve(initial);
-    printResult<2>("结果", result.success, result.message, result.solution, result.finalWidth);
+    printResult<2>("Result", result.success, result.message, result.solution, result.finalWidth);
 
     if (result.success)
     {
@@ -77,8 +77,8 @@ void testSimpleSystem()
 void testCubic()
 {
     std::cout << "\n" << std::string(60, '*') << std::endl;
-    std::cout << "测试2: x^3 - x - 1 = 0 (单变量)" << std::endl;
-    std::cout << "预期解: x ≈ 1.3247" << std::endl;
+    std::cout << "Test 2: x^3 - x - 1 = 0 (Single Variable)" << std::endl;
+    std::cout << "Expected Solution: x ≈ 1.3247" << std::endl;
     std::cout << std::string(60, '*') << std::endl;
 
     auto f = [](const IntervalVec<1>& x) -> IntervalVec<1>
@@ -100,9 +100,9 @@ void testCubic()
     IntervalVec<1> initial;
     initial[0] = Interval(1.0, 2.0);
 
-    std::cout << "初始区间: " << initial << std::endl;
+    std::cout << "Initial Interval: " << initial << std::endl;
     auto result = solver.solve(initial);
-    printResult<1>("结果", result.success, result.message, result.solution, result.finalWidth);
+    printResult<1>("Result", result.success, result.message, result.solution, result.finalWidth);
 
     if (result.success)
     {
@@ -114,8 +114,8 @@ void testCubic()
 void testExponential()
 {
     std::cout << "\n" << std::string(60, '*') << std::endl;
-    std::cout << "测试3: e^x + y = 2, x = e^y" << std::endl;
-    std::cout << "预期解: (0.5, 0.5)" << std::endl;
+    std::cout << "Test 3: e^x + y = 2, x = e^y" << std::endl;
+    std::cout << "Expected Solution: (0.5, 0.5)" << std::endl;
     std::cout << std::string(60, '*') << std::endl;
 
     auto f = [](const IntervalVec<2>& x) -> IntervalVec<2>
@@ -158,8 +158,8 @@ void testExponential()
 void testTrigonometric()
 {
     std::cout << "\n" << std::string(60, '*') << std::endl;
-    std::cout << "测试4: sin(x) = 0.5" << std::endl;
-    std::cout << "预期解: x = π/6 ≈ 0.5236" << std::endl;
+    std::cout << "Test 4: sin(x) = 0.5" << std::endl;
+    std::cout << "Expected Solution: x = π/6 ≈ 0.5236" << std::endl;
     std::cout << std::string(60, '*') << std::endl;
 
     auto f = [](const IntervalVec<1>& x) -> IntervalVec<1>
@@ -195,8 +195,8 @@ void testTrigonometric()
 void testCircleIntersection()
 {
     std::cout << "\n" << std::string(60, '*') << std::endl;
-    std::cout << "测试5: x^2 + y = 2, x - y = 0" << std::endl;
-    std::cout << "预期解: (1, 1)" << std::endl;
+    std::cout << "Test 5: x^2 + y = 2, x - y = 0" << std::endl;
+    std::cout << "Expected Solution: (1, 1)" << std::endl;
     std::cout << std::string(60, '*') << std::endl;
 
     auto f = [](const IntervalVec<2>& x) -> IntervalVec<2>
@@ -239,7 +239,7 @@ void testCircleIntersection()
 int main()
 {
     std::cout << std::string(70, '#') << std::endl;
-    std::cout << "#" << std::setw(68) << std::left << " 固定维度Interval-Krawczyk求解器" << "#" << std::endl;
+    std::cout << "#" << std::setw(68) << std::left << " Fixed Dimension Interval-Krawczyk Solver" << "#" << std::endl;
     std::cout << std::string(70, '#') << std::endl;
 
     testSimpleSystem();
@@ -249,7 +249,7 @@ int main()
     testExponential();
 
     std::cout << "\n" << std::string(70, '#') << std::endl;
-    std::cout << "#" << std::setw(68) << std::left << " 测试完成" << "#" << std::endl;
+    std::cout << "#" << std::setw(68) << std::left << " Testing Complete" << "#" << std::endl;
     std::cout << std::string(70, '#') << std::endl;
 
     return 0;

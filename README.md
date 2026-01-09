@@ -19,17 +19,30 @@ This library is designed for engineers and researchers who need **guarantees**. 
 *   Compute **AE-Solution Sets** (Universal and Existential quantifiers) for control systems under uncertainty.
 *   Run on **embedded systems** thanks to zero dynamic memory allocation.
 
-### Key Concepts
+---
 
--   **Kaucher Interval Arithmetic:** Unlike classical interval arithmetic, Kaucher intervals (or directed intervals) allow "improper" intervals where the lower bound is greater than the upper bound. This creates a group structure, enabling better algebraic properties and the solution of problems involving quantifiers (e.g., $\forall x \exists y: f(x,y)=0$).
--   **Generalized Krawczyk Operator:** An extension of the Newton-Kantorovich method. It maps an interval vector to another. If the image is contained within the domain, it mathematically proves a solution exists inside.
+## 🔬 Scientific Background & Applications
+
+The algorithms implemented in this library (Interval Newton / Krawczyk Operator) belong to the field of **Rigorous Computing** and **Verified Numerical Analysis**. These are not just experimental tools; they are the foundation for solving some of the hardest problems in science and engineering.
+
+### Similar Standard Tools
+If you are familiar with the following academic standards, you will feel right at home with this library, which brings similar rigorous capabilities to modern C++:
+*   **INTLAB (MATLAB):** The industry standard for interval analysis. Our solver implements verification logic similar to INTLAB's `verifynlss`.
+*   **IBEX (C++):** A famous library for constraint programming.
+*   **C-XSC:** The pioneer of C++ extended scientific computing.
+
+### Real-World Power
+The techniques used in this project are critical in fields where "close enough" is not acceptable:
+*   **🤖 Robotics:** Solving the forward kinematics of **Parallel Robots (Stewart Platforms)**. Unlike standard Newton's method, Interval Krawczyk guarantees finding *all* possible geometric configurations, ensuring safety.
+*   **🪐 Mathematical Proofs:** Similar interval arithmetic techniques were essential in the computer-assisted proofs of the **Kepler Conjecture** (sphere packing) and the existence of the **Lorenz Attractor** (chaos theory).
+*   **⚗️ Chemical Engineering:** Rigorous phase stability analysis where missing a root can lead to dangerous process failures.
 
 ---
 
 ## ✨ Features
 
 *   🚀 **High Performance:** Built on **Eigen 3.4**, utilizing SIMD vectorization where possible.
-*   💾 **Zero Dynamic Allocation:** Uses fixed-size `IntervalVector` and `IntervalMatrix` templates. deterministic memory usage makes it ideal for real-time and embedded applications.
+*   💾 **Zero Dynamic Allocation:** Uses fixed-size `IntervalVector` and `IntervalMatrix` templates. Deterministic memory usage makes it ideal for real-time and embedded applications.
 *   🧮 **Kaucher Arithmetic:** Full support for both proper and improper intervals, enabling complex algebraic completions.
 *   🔍 **AE-Solution Sets:** Capable of solving problems with mixed quantifiers ($\forall$ and $\exists$), critical for robust control and tolerance analysis.
 *   🔄 **Homotopy Continuation:** Integrated methods to find multiple roots or track solutions as parameters change.

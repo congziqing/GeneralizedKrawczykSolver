@@ -10,7 +10,7 @@
 #include "../include/interval_krawczyk/IntervalMatrix.h"
 using namespace ik;
 
-// 牛顿法预迭代函数，用于找到高精度的中心点
+// Newton method pre-iteration function for finding high-precision center point
 double newton_method_1d(double x_init, const std::function<double(double)>& f, const std::function<double(double)>& df, int max_iter = 10, double tol = 1e-12)
 {
     double x = x_init;
@@ -36,7 +36,7 @@ double newton_method_1d(double x_init, const std::function<double(double)>& f, c
     return x;
 }
 
-// 2D牛顿法预迭代函数
+// 2D Newton method pre-iteration function
 auto newton_method_2d(double x1_init, double x2_init, 
                       const std::function<std::array<double, 2>(double, double)>& f, 
                       const std::function<std::array<std::array<double, 2>, 2>(double, double)>& df, 
@@ -95,7 +95,7 @@ auto newton_method_2d(double x1_init, double x2_init,
     return std::make_pair(x1, x2);
 }
 
-// 验证函数：检查f(X)是否严格位于Y的内部
+// Verification function: Check if f(X) is strictly inside Y
 template<size_t N>
 bool verify_inner_inclusion(const IntervalVector<N>& X, 
                            const IntervalVector<N>& Y)
@@ -123,7 +123,7 @@ bool verify_inner_inclusion(const IntervalVector<N>& X,
     {
         if (!Y[i].isImproper())
         {
-            std::cout << "   错误：Y[" << i << "] 不是improper区间" << std::endl;
+            std::cout << "   Error: Y[" << i << "] is not an improper interval" << std::endl;
             return false;
         }
         
@@ -131,13 +131,13 @@ bool verify_inner_inclusion(const IntervalVector<N>& X,
         
         if (!fX[i].isProper())
         {
-            std::cout << "   错误：f(X)[" << i << "] 不是proper区间" << std::endl;
+            std::cout << "   Error: f(X)[" << i << "] is not a proper interval" << std::endl;
             return false;
         }
         
-        // 检查fX(i)是否严格包含在Y_dual内部
+        // Check if fX(i) is strictly contained within Y_dual
         bool contains = Y_dual.contains(fX[i]);
-        std::cout << "   f(X)[" << i << "] 是否包含在 Y_dual[" << i << "] 中: " << (contains ? "是" : "否") << std::endl;
+        std::cout << "   f(X)[" << i << "] contained in Y_dual[" << i << "]: " << (contains ? "Yes" : "No") << std::endl;
         
         if (!contains)
         {
@@ -148,25 +148,25 @@ bool verify_inner_inclusion(const IntervalVector<N>& X,
     return true;
 }
 
-// 测试：Tolerance Embedding Problem (2D) - 直接验证
+// Test: Tolerance Embedding Problem (2D) - Direct Verification
 void testToleranceEmbeddingDirect()
 {
-    std::cout << "=== 测试: Tolerance Embedding Problem (2D) - 直接验证 ===\n";
+    std::cout << "=== Test: Tolerance Embedding Problem (2D) - Direct Verification ===\n";
     
-    // 定义问题：
+    // Define problem:
     // f1(x1, x2) = x1^2 + x2^2 = 4 + e1
     // f2(x1, x2) = x1 - x2 = 0 + e2
-    // 其中 e1 ∈ [-0.1, 0.1], e2 ∈ [-0.1, 0.1]
+    // where e1 ∈ [-0.1, 0.1], e2 ∈ [-0.1, 0.1]
     
-    // 目标Y：使用improper区间表示对偶形式
+    // Target Y: Using improper intervals for dual representation
     IntervalVector<2> Y;
     Y[0] = KaucherInterval(3.9, 4.1).dual(); // 非正常区间 [4.1, 3.9]
     Y[1] = KaucherInterval(-0.1, 0.1).dual(); // 非正常区间 [0.1, -0.1]
     
-    std::cout << "目标Y（improper）: " << "[" << Y[0] << ", " << Y[1] << "]" << std::endl;
+    std::cout << "Target Y (improper): " << "[" << Y[0] << ", " << Y[1] << "]" << std::endl;
     
-    // 1. 使用牛顿法预迭代找到高精度中心点x*
-    std::cout << "\n1. 牛顿法预迭代寻找中心点...\n";
+    // 1. Use Newton method pre-iteration to find high-precision center point x*
+    std::cout << "\n1. Newton method pre-iteration to find center point...\n";
     
     // 定义点函数f（用于牛顿法）
     auto point_f = [](double x1, double x2) -> std::array<double, 2> {
@@ -193,24 +193,24 @@ void testToleranceEmbeddingDirect()
     // 运行牛顿法
     auto [x1_star, x2_star] = newton_method_2d(x1_init, x2_init, point_f, point_df);
     
-    std::cout << "   初始猜测: (" << x1_init << ", " << x2_init << ")" << std::endl;
-    std::cout << "   牛顿法结果: x* = (" << x1_star << ", " << x2_star << ")" << std::endl;
+    std::cout << "   Initial guess: (" << x1_init << ", " << x2_init << ")" << std::endl;
+    std::cout << "   Newton result: x* = (" << x1_star << ", " << x2_star << ")" << std::endl;
     
-    // 验证中心点
+    // Verify center point
     auto f_center = point_f(x1_star, x2_star);
     std::cout << "   f(x*) = (" << f_center[0] << ", " << f_center[1] << ")" << std::endl;
     
-    // 2. 构造小初始区间
-    std::cout << "\n2. 构造小初始区间...\n";
+    // 2. Construct small initial interval
+    std::cout << "\n2. Constructing small initial interval...\n";
     double delta = 0.05; // 小区间半径
     IntervalVector<2> X;
     X[0] = KaucherInterval(x1_star - delta, x1_star + delta);
     X[1] = KaucherInterval(x2_star - delta, x2_star + delta);
     
-    std::cout << "   初始区间X: " << "[" << X[0] << ", " << X[1] << "]" << std::endl;
-    std::cout << "   区间宽度: " << X[0].width() << " × " << X[1].width() << std::endl;
+    std::cout << "   Initial interval X: " << "[" << X[0] << ", " << X[1] << "]" << std::endl;
+    std::cout << "   Interval width: " << X[0].width() << " × " << X[1].width() << std::endl;
     
-    // 3. 定义函数f
+    // 3. Define function f
     auto f = [](const IntervalVector<2>& x) -> IntervalVector<2> {
         IntervalVector<2> result;
         result[0] = x[0] * x[0] + x[1] * x[1];
@@ -218,20 +218,20 @@ void testToleranceEmbeddingDirect()
         return result;
     };
     
-    // 4. 直接计算f(X)并验证内包围
-    std::cout << "\n3. 直接计算f(X)并验证内包围...\n";
+    // 4. Directly compute f(X) and verify inner inclusion
+    std::cout << "\n3. Directly computing f(X) and verifying inner inclusion...\n";
     IntervalVector<2> fX = f(X);
     
     std::cout << "   f(X) = " << "[" << fX[0] << ", " << fX[1] << "]" << std::endl;
     
-    // 5. 验证内包围
-    std::cout << "\n4. 内包围验证...\n";
+    // 5. Verify inner inclusion
+    std::cout << "\n4. Verifying inner inclusion...\n";
     bool inner_inclusion = verify_inner_inclusion(X, Y);
     
-    std::cout << "\n5. 最终结果: " << (inner_inclusion ? "✓ 内包围验证通过" : "✗ 内包围验证失败") << std::endl;
+    std::cout << "\n5. Final result: " << (inner_inclusion ? "✓ Inner inclusion verified" : "✗ Inner inclusion failed") << std::endl;
     
-    // 6. 额外验证：检查四个角点
-    std::cout << "\n6. 角点验证...\n";
+    // 6. Additional verification: Check four corners
+    std::cout << "\n6. Corner verification...\n";
     std::array<std::pair<double, double>, 4> corners;
     corners[0] = std::make_pair(X[0].lower(), X[1].lower());
     corners[1] = std::make_pair(X[0].lower(), X[1].upper());
@@ -247,29 +247,29 @@ void testToleranceEmbeddingDirect()
         bool in_y1 = (fx[0] >= 3.9 && fx[0] <= 4.1);
         bool in_y2 = (fx[1] >= -0.1 && fx[1] <= 0.1);
         
-        std::cout << "   角点 " << i+1 << " (" << x1 << ", " << x2 << "): "
+        std::cout << "   Corner " << i+1 << " (" << x1 << ", " << x2 << "): "
                   << "f = (" << fx[0] << ", " << fx[1] << ") - "
-                  << (in_y1 && in_y2 ? "✓ 有效" : "✗ 无效") << std::endl;
+                  << (in_y1 && in_y2 ? "✓ Valid" : "✗ Invalid") << std::endl;
     }
     
     std::cout << std::endl;
 }
 
-// 测试：1D Tolerance Embedding Problem - 直接验证
+// Test: 1D Tolerance Embedding Problem - Direct Verification
 void testToleranceEmbedding1DDirect()
 {
-    std::cout << "=== 测试: 1D Tolerance Embedding Problem - 直接验证 ===\n";
+    std::cout << "=== Test: 1D Tolerance Embedding Problem - Direct Verification ===\n";
     
-    // 定义问题：f(x) = x^2 = 2 + e，其中 e ∈ [-0.1, 0.1]
+    // Define problem: f(x) = x^2 = 2 + e, where e ∈ [-0.1, 0.1]
     
-    // 目标Y：使用improper区间表示对偶形式
+    // Target Y: Using improper intervals for dual representation
     IntervalVector<1> Y;
     Y[0] = KaucherInterval(1.9, 2.1).dual(); // 非正常区间 [2.1, 1.9]
     
-    std::cout << "目标Y（improper）: " << "[" << Y[0] << "]" << std::endl;
+    std::cout << "Target Y (improper): " << "[" << Y[0] << "]" << std::endl;
     
-    // 1. 使用牛顿法预迭代
-    std::cout << "\n1. 牛顿法预迭代寻找中心点...\n";
+    // 1. Use Newton method pre-iteration
+    std::cout << "\n1. Newton method pre-iteration to find center point...\n";
     
     auto f_1d = [](double x) -> double {
         return x * x - 2.0;
@@ -282,20 +282,20 @@ void testToleranceEmbedding1DDirect()
     double x0 = 1.4;
     double x_star = newton_method_1d(x0, f_1d, df_1d);
     
-    std::cout << "   初始猜测: " << x0 << std::endl;
-    std::cout << "   牛顿法结果: x* = " << x_star << std::endl;
+    std::cout << "   Initial guess: " << x0 << std::endl;
+    std::cout << "   Newton result: x* = " << x_star << std::endl;
     std::cout << "   f(x*) = " << f_1d(x_star) << std::endl;
     
-    // 2. 构造小初始区间
-    std::cout << "\n2. 构造小初始区间...\n";
+    // 2. Construct small initial interval
+    std::cout << "\n2. Constructing small initial interval...\n";
     double delta = 0.05;
     IntervalVector<1> X;
     X[0] = KaucherInterval(x_star - delta, x_star + delta);
     
-    std::cout << "   初始区间X: " << "[" << X[0] << "]" << std::endl;
+    std::cout << "   Initial interval X: " << "[" << X[0] << "]" << std::endl;
     
-    // 3. 直接计算f(X)并验证内包围
-    std::cout << "\n3. 直接计算f(X)并验证内包围...\n";
+    // 3. Directly compute f(X) and verify inner inclusion
+    std::cout << "\n3. Directly computing f(X) and verifying inner inclusion...\n";
     
     // 定义函数f
     auto f = [](const IntervalVector<1>& x) -> IntervalVector<1> {
@@ -307,14 +307,14 @@ void testToleranceEmbedding1DDirect()
     IntervalVector<1> fX = f(X);
     std::cout << "   f(X) = " << "[" << fX[0] << "]" << std::endl;
     
-    // 4. 验证内包围
-    std::cout << "\n4. 内包围验证...\n";
+    // 4. Verify inner inclusion
+    std::cout << "\n4. Verifying inner inclusion...\n";
     bool inner_inclusion = verify_inner_inclusion(X, Y);
     
-    std::cout << "\n5. 最终结果: " << (inner_inclusion ? "✓ 内包围验证通过" : "✗ 内包围验证失败") << std::endl;
+    std::cout << "\n5. Final result: " << (inner_inclusion ? "✓ Inner inclusion verified" : "✗ Inner inclusion failed") << std::endl;
     
-    // 6. 额外验证：检查边界点
-    std::cout << "\n6. 边界点验证...\n";
+    // 6. Additional verification: Check boundary points
+    std::cout << "\n6. Boundary point verification...\n";
     std::array<double, 2> bounds = {X[0].lower(), X[0].upper()};
     
     for (size_t i = 0; i < bounds.size(); ++i)
@@ -325,9 +325,9 @@ void testToleranceEmbedding1DDirect()
         // 检查是否在目标Y内（考虑容差）
         bool in_y = (fx >= 1.9 && fx <= 2.1);
         
-        std::cout << "   边界点 " << i+1 << " (" << x << "): "
+        std::cout << "   Boundary point " << i+1 << " (" << x << "): "
                   << "f = " << fx << " - "
-                  << (in_y ? "✓ 有效" : "✗ 无效") << std::endl;
+                  << (in_y ? "✓ Valid" : "✗ Invalid") << std::endl;
     }
     
     std::cout << std::endl;
@@ -335,26 +335,26 @@ void testToleranceEmbedding1DDirect()
 
 int main()
 {
-    std::cout << "=== Tolerance Embedding 最终实现 ===\n\n";
+    std::cout << "=== Tolerance Embedding Final Implementation ===\n\n";
     
-    // 展示Kaucher区间算术的基本特性
-    std::cout << "=== Kaucher区间算术特性 ===\n";
+    // Demonstrate basic properties of Kaucher interval arithmetic
+    std::cout << "=== Kaucher Interval Arithmetic Properties ===\n";
     KaucherInterval proper(1.0, 2.0);
     KaucherInterval improper(2.0, 1.0);
     
-    std::cout << "正常区间 a = " << proper << std::endl;
-    std::cout << "非正常区间 b = " << improper << std::endl;
+    std::cout << "Proper interval a = " << proper << std::endl;
+    std::cout << "Improper interval b = " << improper << std::endl;
     std::cout << "a + b = " << (proper + improper) << std::endl;
     std::cout << "a - b = " << (proper - improper) << std::endl;
-    std::cout << "a的逆元 = " << (-proper) << std::endl;
-    std::cout << "b的对偶 = " << improper.dual() << std::endl;
+    std::cout << "Inverse of a = " << (-proper) << std::endl;
+    std::cout << "Dual of b = " << improper.dual() << std::endl;
     std::cout << std::endl;
     
-    // 运行测试
-    testToleranceEmbedding1DDirect(); // 1D测试
-    testToleranceEmbeddingDirect();   // 2D测试
+    // Run tests
+    testToleranceEmbedding1DDirect(); // 1D test
+    testToleranceEmbeddingDirect();   // 2D test
     
-    std::cout << "=== 测试完成 ===\n";
+    std::cout << "=== Testing Complete ===\n";
     
     return 0;
 }
